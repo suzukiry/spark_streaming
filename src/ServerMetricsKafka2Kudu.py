@@ -9,7 +9,7 @@ if __name__ == "__main__":
     #spark.sparkContext.setLogLevel("WARN")
     spark.sparkContext.setLogLevel("ERROR")
 
-    kafkaDataFrame = spark.readStream.format("kafka").option("kafka.bootstrap.servers", "10.0.0.101:9092").option("subscribe", "tp-server-metrics").load()
+    kafkaDataFrame = spark.readStream.format("kafka").option("kafka.bootstrap.servers", "10.1.2.8:9092,10.1.2.13:9092,10.1.2.10:9092").option("subscribe", "tp-server-metrics").load()
 
     stringFormattedDataFrame = kafkaDataFrame.selectExpr("CAST(value AS STRING) as value")
 
@@ -50,17 +50,16 @@ if __name__ == "__main__":
 
     dstatDataFrame = formattedDataFrame.withColumn("key",concat_ws('_',col("hostname"),col("time")))
 
-#    kuduMaster = "10.0.0.101"
-#    tableName = "dstat_metrics"
-#    operation = "upsert"
-#    kuduQuery = dstatDataFrame.writeStream.outputMode("append") \
-#                        .format("kudu") \
-#                        .option("kudu.master", kuduMaster) \
-#                        .option("kudu.table", tableName) \
-#                        .option("kudu.operation", operation) \
-#                        .option("checkpointLocation", "/tmp/checkpoint/ServerMetricsKafka2Kudu") \
-#                        .start()
-#
+    kuduMaster = "10.1.2.16"
+    tableName = "dstat_metrics"
+    operation = "upsert"
+    kuduQuery = dstatDataFrame.writeStream.outputMode("append") \
+                        .format("kudu") \
+                        .option("kudu.master", kuduMaster) \
+                        .option("kudu.table", tableName) \
+                        .option("kudu.operation", operation) \
+                        .option("checkpointLocation", "/tmp/checkpoint/ServerMetricsKafka2Kudu") \
+                        .start()
 
     consoleQuery = dstatDataFrame.writeStream.outputMode("update").format("console").start()
     consoleQuery.awaitTermination()
