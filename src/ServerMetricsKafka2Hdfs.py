@@ -9,7 +9,7 @@ if __name__ == "__main__":
     #spark.sparkContext.setLogLevel("WARN")
     spark.sparkContext.setLogLevel("ERROR")
 
-    kafkaDataFrame = spark.readStream.format("kafka").option("kafka.bootstrap.servers", "10.1.2.14:9092").option("subscribe", "tp-server-metrics").load()
+    kafkaDataFrame = spark.readStream.format("kafka").option("kafka.bootstrap.servers", "10.1.2.14:9092,10.1.2.7:9092,10.1.2.11:9092").option("subscribe", "tp-server-metrics").load()
 
     stringFormattedDataFrame = kafkaDataFrame.selectExpr("CAST(value AS STRING) as value")
 
